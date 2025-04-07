@@ -10,16 +10,8 @@ def treeFromFile(filename):
     :param filename: URDF file path
     """
 
-    with open(filename) as urdf_file:
+    with open(filename, 'rb') as urdf_file:
         return treeFromUrdfModel(urdf.URDF.from_xml_string(urdf_file.read()))
-
-def treeFromParam(param):
-    """
-    Construct a PyKDL.Tree from an URDF in a ROS parameter.
-    :param param: Parameter name, ``str``
-    """
-
-    return treeFromUrdfModel(urdf.URDF.from_parameter_server())
 
 def treeFromString(xml):
     """
@@ -50,9 +42,9 @@ def _toKdlInertia(i):
 
 def _toKdlJoint(jnt):
 
-    fixed = lambda j,F: kdl.Joint(j.name, kdl.Joint.None)
-    rotational = lambda j,F: kdl.Joint(j.name, F.p, F.M * kdl.Vector(*j.axis), kdl.Joint.RotAxis)
-    translational = lambda j,F: kdl.Joint(j.name, F.p, F.M * kdl.Vector(*j.axis), kdl.Joint.TransAxis)
+    def fixed(j,F): return kdl.Joint(j.name, kdl.Joint.Fixed)
+    def rotational(j,F): return kdl.Joint(j.name, F.p, F.M * kdl.Vector(*j.axis), kdl.Joint.RotAxis)
+    def translational(j,F): return kdl.Joint(j.name, F.p, F.M * kdl.Vector(*j.axis), kdl.Joint.TransAxis)
 
     type_map = {
             'fixed': fixed,
